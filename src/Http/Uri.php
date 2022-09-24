@@ -4,9 +4,15 @@ namespace Solar\MicroFramework\Http;
 
 use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
+use Solar\Microframework\Trait\CloneWithTrait;
 
 class Uri implements UriInterface
 {
+    use CloneWithTrait;
+    
+    /**
+     * 
+     */
     protected const SCHEME_PORTS = ['http' => 80, 'https' => 443];
 
     /**
@@ -156,8 +162,8 @@ class Uri implements UriInterface
         if ($scheme !== 'http' && $scheme !== 'https') {
             throw new InvalidArgumentException("Scheme $scheme not supported");
         }
-
-        return $this->immutableInstance(['scheme' => $scheme]);
+        
+        return $this->cloneWith(['scheme' => $scheme]);
     }
 
     /**
@@ -171,7 +177,7 @@ class Uri implements UriInterface
             return $this;
         }
 
-        return $this->immutableInstance(['user' => $user, 'password' => $password]);
+        return $this->cloneWith(['user' => $user, 'password' => $password]);
     }
 
     /**
@@ -184,7 +190,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException("Invalid host: $host");
         }
 
-        return $this->immutableInstance(['host' => $host]);
+        return $this->cloneWith(['host' => $host]);
     }
 
     /**
@@ -197,7 +203,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException("Invalid port: $port");
         }
 
-        return $this->immutableInstance(['port' => $port]);
+        return $this->cloneWith(['port' => $port]);
     }
 
     /**
@@ -210,7 +216,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException("Invalid path: $path");
         }
 
-        return $this->immutableInstance(['path' => $path]);
+        return $this->cloneWith(['path' => $path]);
     }
 
     /**
@@ -231,7 +237,7 @@ class Uri implements UriInterface
             throw new InvalidArgumentException("Invalid query provided");
         }
 
-        return $this->immutableInstance(['query' => $queryAr]);
+        return $this->cloneWith(['query' => $queryAr]);
     }
 
     /**
@@ -240,7 +246,7 @@ class Uri implements UriInterface
      */
     public function withFragment($fragment): static
     {
-        return $this->immutableInstance(['fragment' => $fragment]);
+        return $this->cloneWith(['fragment' => $fragment]);
     }
 
     /**
@@ -267,32 +273,5 @@ class Uri implements UriInterface
         }
 
         return $uri;
-    }
-
-    /**
-     * @param array $properties
-     * @return $this
-     */
-    protected function immutableInstance(array $properties): static
-    {
-        $diff = [];
-
-        foreach ($properties as $name => $value) {
-            if ($this->$name !== $value) {
-                $diff[$name] = $value;
-            }
-        }
-
-        if (!count($diff)) {
-            return $this;
-        }
-
-        $clone = clone $this;
-
-        foreach ($diff as $name => $value) {
-            $clone->$name = $value;
-        }
-
-        return $clone;
     }
 }
